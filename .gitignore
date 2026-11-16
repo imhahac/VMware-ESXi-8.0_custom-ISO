@@ -1,0 +1,8 @@
+# VMware / Broadcom 檔案不可散布，請自行下載
+*.iso
+*.zip
+
+# 其他本機檔案
+*.app/
+*.tar.bz2
+.DS_Store
