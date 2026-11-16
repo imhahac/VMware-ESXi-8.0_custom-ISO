@@ -5,7 +5,7 @@
 1. **安裝時找不到網卡**：ESXi 8 內建驅動不支援 RTL8111H。本 repo 的腳本會把 Broadcom 官方的 Realtek Fling 驅動注入官方 ISO。
 2. **裝好後網路極慢**：延遲固定約 1 秒，上傳只有約 140 KB/s。原因是驅動預設的 INTx 中斷在這片主機板上無法運作，改用 MSI 中斷即可解決（[第 5 節](#5-網路極慢延遲約-1-秒改用-msi-中斷)）。
 
-> 本 repo 不包含任何 VMware / Broadcom 的檔案。ISO 與驅動請自行從 Broadcom Support Portal 下載。
+> 可直接從本 repo 的 [Releases](https://github.com/imhahac/VMware-ESXi-8.0_custom-ISO/releases/tag/v8.0U3e-24677879) 下載已封裝好的自製 ISO 與 Realtek 驅動，或自行從 Broadcom Support Portal 下載原版檔案並用腳本重新封裝。
 
 ---
 
@@ -38,6 +38,27 @@
 
 ## 1. 下載所需檔案
 
+### 方式 A：直接從 GitHub Releases 下載（推薦）
+
+本 repo 的 [Releases (`v8.0U3e-24677879`)](https://github.com/imhahac/VMware-ESXi-8.0_custom-ISO/releases/tag/v8.0U3e-24677879) 已提供封裝好的自製 ISO、官方原版 ISO 與 Realtek 驅動 Offline Bundle：
+
+| 檔案 | 說明 | SHA256 |
+|---|---|---|
+| [`VMware-VMvisor-Installer-8.0U3e-24677879-Realtek.x86_64.iso`](https://github.com/imhahac/VMware-ESXi-8.0_custom-ISO/releases/download/v8.0U3e-24677879/VMware-VMvisor-Installer-8.0U3e-24677879-Realtek.x86_64.iso) | 已注入 Realtek 驅動 + `autoPartitionOSDataSize=8192` 的自製安裝 ISO（下載後可**直接跳到[第 3 節](#3-用-rufus-製作-usb-並安裝)**） | `54493651ae6d21a545c5dd1eb4ca4c05baf8858f592173e4fda04acb8453587a` |
+| [`VMware-Re-Driver_1.101.01-5vmw.800.1.0.20613240.zip`](https://github.com/imhahac/VMware-ESXi-8.0_custom-ISO/releases/download/v8.0U3e-24677879/VMware-Re-Driver_1.101.01-5vmw.800.1.0.20613240.zip) | Realtek Network Driver for ESXi Fling（安裝完成後於[第 4 節](#正式安裝驅動強烈建議)正式安裝驅動用） | `365b5b2ee604111ea651dd123d8d7167bd1513a20ec217520d26923395cfba9d` |
+| [`VMware-VMvisor-Installer-8.0U3e-24677879.x86_64.iso`](https://github.com/imhahac/VMware-ESXi-8.0_custom-ISO/releases/download/v8.0U3e-24677879/VMware-VMvisor-Installer-8.0U3e-24677879.x86_64.iso) | VMware ESXi 8.0U3e 官方原版 ISO（需要重新執行 `make-realtek-iso.sh` 時才需下載） | `9782c96ffd01cc56da17ec31573da69f4cba2f9402e67c8b55d05d9472c7376a` |
+
+也可以用 GitHub CLI 一行下載並驗證 SHA256：
+
+```bash
+gh release download v8.0U3e-24677879 -R imhahac/VMware-ESXi-8.0_custom-ISO
+shasum -a 256 VMware-*.iso VMware-*.zip
+```
+
+---
+
+### 方式 B：從 Broadcom Support Portal 自行下載
+
 需要登入 [Broadcom Support Portal](https://support.broadcom.com/)（免費註冊）。
 
 | 檔案 | 位置 |
@@ -49,7 +70,7 @@
 >
 > 免費版只提供 ISO，**沒有 offline depot (.zip)**，所以不能用 PowerCLI Image Builder 製作自製 ISO，才改用本 repo 的做法。
 
-下載後確認 ISO 的 SHA256：
+下載後確認原版 ISO 的 SHA256：
 
 ```text
 9782c96ffd01cc56da17ec31573da69f4cba2f9402e67c8b55d05d9472c7376a  VMware-VMvisor-Installer-8.0U3e-24677879.x86_64.iso
@@ -380,5 +401,4 @@ skip:
 ## 免責聲明
 
 - Realtek Fling 驅動是 VMware Fling，**不在官方支援範圍內**，僅建議用於 homelab。
-- 本 repo 只包含腳本與文件，不散布任何 VMware / Broadcom 的二進位檔案。
 - 使用風險自負。如果需要穩定的生產環境，建議加裝 ESXi 原生支援的 Intel 網卡（例如 I210、I350、X540）。
